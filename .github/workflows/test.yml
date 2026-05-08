@@ -1,5 +1,8 @@
 on: [push, pull_request]
 name: Test
+permissions:
+  contents: read
+
 jobs:
   test:
     strategy:
@@ -7,8 +10,13 @@ jobs:
         go-version: [oldstable, stable]
     runs-on: ubuntu-latest
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
       - name: Install Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
         with:
           go-version: ${{ matrix.go-version }}
       - name: Install Packages
@@ -16,7 +24,7 @@ jobs:
           sudo apt-get -qq update
           sudo apt-get install -y build-essential
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - name: Test Chrome
         run: go test -v ./...
       - name: Test headless-shell
